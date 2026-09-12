@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FURIA | Suporte</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="feed.html" class="logo"><b>|</b> FURIA</a>
+
+        <div class="nav-links">
+            <span id="nav-usuario">DANIEL</span>
+
+            <div class="notificacao">
+                <button class="sino" onclick="abrirNotificacoes()">🔔</button>
+                <span id="badge" class="badge oculto">0</span>
+
+                <div id="painel-notificacoes" class="painel-notificacoes">
+                    <div class="notificacao-topo">
+                        <strong>Notificações</strong>
+                        <button onclick="limparNotificacoes()">Limpar</button>
+                    </div>
+                    <div id="lista-notificacoes"></div>
+                </div>
+            </div>
+
+            <a href="perfil.html" class="btn-nav">Meu perfil</a>
+            <a href="index.html" onclick="sair()">Sair</a>
+        </div>
+    </nav>
+
+    <main class="card suporte-card">
+        <h1>Suporte - FURIA</h1>
+        <p class="subtitulo">Caixa de suporte</p>
+
+        <label for="comentario">Seu comentário</label>
+        <textarea id="comentario" maxlength="500"
+            placeholder="Descreva seu problema ou sugestão..."
+            oninput="contadorComentario()"></textarea>
+        <small id="contador-comentario">0/500 caracteres</small>
+
+        <button class="btn-principal" onclick="enviarComentario()">
+            Enviar comentário
+        </button>
+
+        <div class="links">
+            <a href="perfil.html">Meu perfil</a>
+            <a href="feed.html">Voltar ao feed</a>
+            <a href="index.html">Voltar para login</a>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

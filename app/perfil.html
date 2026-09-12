@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vrei Valk — Perfil do membro</title>
+  <meta name="description" content="Veja e edite o perfil do membro: foto, biografia, estatísticas e postagens.">
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header class="topo" id="topo"></header>
+
+  <main class="container">
+    <h1>Perfil</h1>
+
+    <div class="cartao perfil-topo">
+      <div id="avatar"></div>
+      <div id="nome-perfil">@</div>
+      <p class="post-conteudo" id="bio-visual" style="margin-top:8px;color:#9a9a9a"></p>
+    </div>
+
+    <div class="grade" style="margin-bottom:18px">
+      <div class="estatistica"><strong id="total-posts">0</strong><span>Postagens</span></div>
+      <div class="estatistica"><strong id="total-curtidas">0</strong><span>Curtidas</span></div>
+      <div class="estatistica"><strong id="total-comentarios">0</strong><span>Comentários</span></div>
+    </div>
+
+    <div class="cartao" id="formulario-perfil">
+      <h2 style="margin-top:0;font-size:14px">Editar meus dados</h2>
+
+      <label for="email">E-mail</label>
+      <input type="email" id="email" placeholder="voce@email.com">
+
+      <label for="nascimento">Data de nascimento</label>
+      <input type="date" id="nascimento">
+
+      <label for="bio">Biografia</label>
+      <textarea id="bio" maxlength="500" placeholder="Fale sobre você..." oninput="contadorBio()"></textarea>
+      <div class="contador" id="contador-bio">0/500 caracteres</div>
+
+      <label for="foto">Foto de perfil</label>
+      <input type="file" id="foto" accept="image/*" onchange="mostrarFotoPerfil(this)">
+      <div class="arquivo" id="nome-foto-perfil">Nenhum arquivo escolhido</div>
+
+      <button class="botao" style="margin-top:16px" onclick="salvarPerfil()">Salvar perfil</button>
+      <p class="mensagem" id="mensagem-perfil"></p>
+    </div>
+
+    <h2 style="font-size:14px">Postagens deste perfil</h2>
+    <div id="container-posts"></div>
+  </main>
+
+  <footer class="rodape">Vrei Valk — comunidade</footer>
+
+  <script src="script.js"></script>
+  <script>
+    if (exigirLogin()) {
+      montarTopo("perfil.html");
+      carregarPerfil();
+    }
+  </script>
+</body>
+</html>

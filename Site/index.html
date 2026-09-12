@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FURIA | Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="pagina-login">
+    <nav class="navbar">
+        <a href="feed.html" class="logo"><b>|</b> FURIA</a>
+        <div class="nav-links">
+            
+        </div>
+    </nav>
+
+    <main class="card login-card">
+        <a href="feed.html" class="logo logo-grande"><b>|</b> FURIA</a>
+
+        <label for="usuario">Usuário</label>
+        <input id="usuario" type="text" placeholder="usuario">
+
+        <label for="senha">Senha</label>
+        <input id="senha" type="password" placeholder="********">
+
+        <button class="btn-principal" onclick="fazerLogin()">Entrar</button>
+        <p id="mensagem" class="mensagem"></p>
+
+        <hr>
+        <button class="btn-secundario" onclick="location.href='registro.html'">
+            Criar conta
+        </button>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

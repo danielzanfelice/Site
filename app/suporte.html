@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vrei Valk — Suporte e ajuda</title>
+  <meta name="description" content="Abra um chamado de suporte da Vrei Valk e acompanhe o status das suas solicitações.">
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <header class="topo" id="topo"></header>
+
+  <main class="container">
+    <h1>Suporte</h1>
+    <p class="subtitulo">Problemas, dúvidas ou denúncias — fale com a equipe.</p>
+
+    <div class="cartao">
+      <label for="assunto">Assunto</label>
+      <input type="text" id="assunto" placeholder="Resumo do problema" maxlength="120">
+
+      <label for="categoria">Categoria</label>
+      <select id="categoria">
+        <option>Conta e acesso</option>
+        <option>Postagens e feed</option>
+        <option>Denúncia de usuário</option>
+        <option>Sugestão</option>
+        <option>Geral</option>
+      </select>
+
+      <label for="descricao">Descrição</label>
+      <textarea id="descricao" maxlength="1000" placeholder="Descreva com detalhes o que aconteceu..."></textarea>
+
+      <button class="botao" style="margin-top:16px" onclick="enviarChamado()">Enviar chamado</button>
+      <p class="mensagem" id="mensagem-suporte"></p>
+    </div>
+
+    <h2 style="font-size:14px">Meus chamados</h2>
+    <div id="lista-chamados"></div>
+
+    <h2 style="font-size:14px;margin-top:30px">Perguntas frequentes</h2>
+    <div class="cartao">
+      <h3 style="margin-top:0;font-size:13px">Esqueci minha senha, e agora?</h3>
+      <p class="post-conteudo">Crie uma nova conta ou peça ajuda pelo chamado "Conta e acesso".</p>
+      <h3 style="font-size:13px">Como apago uma postagem?</h3>
+      <p class="post-conteudo">Abra o menu de três pontos na sua postagem e escolha "Excluir".</p>
+      <h3 style="font-size:13px">Quem vê meus dados?</h3>
+      <p class="post-conteudo">Tudo fica salvo apenas neste navegador, no seu próprio aparelho.</p>
+    </div>
+  </main>
+
+  <footer class="rodape">Vrei Valk — comunidade</footer>
+
+  <script src="script.js"></script>
+  <script>
+    if (exigirLogin()) {
+      montarTopo("suporte.html");
+      carregarChamados();
+    }
+  </script>
+</body>
+</html>
