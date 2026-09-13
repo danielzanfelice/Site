@@ -58,26 +58,25 @@ app.use(express.static(__dirname));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ==========================================
-// CONEXÃO COM O BANCO DE DADOS (CONFIGURADO PARA PRODUÇÃO)
+// CONEXÃO COM O BANCO DE DADOS (CONFIGURADO PARA PRODUÇÃO DO TiDB CLOUD)
 // ==========================================
-
 const conexao = mysql.createConnection({
-    host: "://tidbcloud.com", // O Host da imagem
-    port: 4000,                                         // A Porta obrigatória da imagem
-    user: "4GtbN2TQnHKPTtJ.root",                       // Seu Username da imagem
-    password: "qo5ghEqeu7VrYhq2",       // A Senha gerada no Passo 1
-    database: "sys",                                    // O Database padrão da imagem
+    host: "://tidbcloud.com", // Host seguro do TiDB Cloud
+    port: 4000,                                         // Porta obrigatória do TiDB Cloud
+    user: "4GtbN2TQnHKPTtJ.root",                       // Seu usuário do TiDB Cloud
+    password: "qo5ghEqeu7VrYhq2",                       // Sua senha de produção do TiDB Cloud
+    database: "sys",                                    // Banco de dados padrão
     ssl: {
-        rejectUnauthorized: false                       // OBRIGATÓRIO: Permite a conexão segura exigida pela TiDB Cloud
+        rejectUnauthorized: false                       // OBRIGATÓRIO para conexões na nuvem do TiDB Cloud
     }
 });
 
 conexao.connect((erro) => {
     if (erro) {
-        console.error("Erro ao conectar ao MySQL:", erro.message);
+        console.error("Erro ao conectar ao MySQL da TiDB Cloud:", erro.message);
         return;
     }
-    console.log("Conectado ao MySQL da Hospedagem!");
+    console.log("Conectado ao MySQL da TiDB Cloud com segurança!");
 });
 
 // ==========================================
@@ -97,7 +96,7 @@ app.post("/login", limiterLogin, (req, res) => {
             return res.status(500).json({ mensagem: "Erro no servidor." });
         }
         if (!resultados || resultados.length === 0) {
-            return res.status(401).json({ mensagem: "Usuario ou Senha incorretos" });
+            return res.status(401).json({ message: "Usuario ou Senha incorretos" });
         }
         
         const usuarioEncontrado = resultados[0];
@@ -275,7 +274,7 @@ app.post("/perfil", uploadSeguro("foto"), async (req, res) => {
         } catch (erro) {
             return res.status(400).json({
                 sucesso: false,
-                mensagem: "Não foi possível ler essa imagem."
+                mensagem: "Não foi possível lire essa imagem."
             });
         }
     }
@@ -285,8 +284,7 @@ app.post("/perfil", uploadSeguro("foto"), async (req, res) => {
         VALUES (?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             email = VALUES(email),
-            data_nascimento = VALUES(data_nascimento),
-            biografia = VALUES(biografia),
+            data_nascimento = VALUES(data_nascimento),biografia = VALUES(biografia),
             foto = IF(VALUES(foto) IS NULL, foto, VALUES(foto))
     `;
 
@@ -297,15 +295,16 @@ app.post("/perfil", uploadSeguro("foto"), async (req, res) => {
             if (erro) {
                 console.log("Erro ao salvar perfil:", erro);
                 return res.status(500).json({
-                     sucesso: false,
-                     mensagem: "Erro ao salvar o perfil."
+                    sucesso: false,
+                    mensagem: "Erro ao salvar o perfil."
+                });
+            }
+            return res.json({
+                sucesso: true,
+                mensagem: "Perfil salvo com sucesso!"
             });
         }
-        return res.json({
-            sucesso: true,
-            mensagem: "Perfil salvo com sucesso!"
-        });
-    });
+    );
 });
 
 app.get("/perfil", (req, res) => {
@@ -381,7 +380,7 @@ app.put("/postagens/:id", (req, res) => {
     const sql = "UPDATE postagens SET titulo = ?, conteudo = ? WHERE id = ?";
     conexao.query(sql, [titulo, conteudo, id], (erro, resultado) => {
         if (erro) return res.status(500).json({ mensagem: "Erro ao atualizar postagem." });
-        res.json({ mensagem: "Postagem actualizada com sucesso!" });
+        res.json({ mensagem: "Postagem atualizada com sucesso!" });
     });
 });
 
@@ -701,10 +700,10 @@ app.put("/comentarios/:id", (req, res) => {
 });
 
 // ==========================================
-// INICIALIZAÇÃO (ADAPTADO PARA PRODUÇÃO NA NUVEM)
+// INICIALIZAÇÃO (ADAPTADO PARA PORTA DINÂMICA DA RENDER)
 // ==========================================
-const PORT = process.env.PORT || 3000;
 
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando com sucesso na porta ${PORT}`);
 });

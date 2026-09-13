@@ -1,3 +1,4 @@
+const URL_SERVIDOR = "https://onrender.com"; // Substitua pelo seu link real da Render se for diferente
 /* ==========================================
    FUNÇÕES GERAIS E CONTROLE DE SESSÃO
    ========================================== */
@@ -203,7 +204,7 @@ async function carregarPostagens() {
     if (!container) return;
 
     try {
-        const resposta = await fetch("/postagens");
+        const resposta = await fetch(`${URL_SERVIDOR}/postagens`);
         if (!resposta.ok) throw new Error("Erro ao carregar");
         
         const postagens = await resposta.json();
