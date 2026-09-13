@@ -247,10 +247,10 @@ async function carregarPerfil() {
 
     // Se tiver usuário na URL, usamos ele; se não, usamos quem está logado
     const usuarioAlvo = usuarioUrl ? usuarioUrl : meuUsuario;
-    const ehMeuProprioPerfil = !usuarioUrl || usuarioUrl.toLowerCase() === meuUsuario.toLowerCase();
+    const ehMeuProprioPerfil = !usuarioUrl || (usuarioUrl.toLowerCase() === meuUsuario.toLowerCase());
 
     // 2. Elementos da tela
-    const tituloPerfil = document.querySelector(".conteudo-perfil h2, h2");
+    const tituloPerfil = document.getElementById("titulo-perfil") || document.querySelector(".conteudo-perfil h2, h2");
     const nomePerfil = document.getElementById("nome-perfil");
     const btnSalvar = document.querySelector("button[onclick*='salvarPerfil'], .btn-salvar, button.btn-principal");
     const campoFoto = document.getElementById("foto") || document.getElementById("foto-perfil");
@@ -267,7 +267,7 @@ async function carregarPerfil() {
         tituloPerfil.textContent = ehMeuProprioPerfil ? "Meu perfil" : `Perfil de ${usuarioAlvo}`;
     }
 
-    // 4. Se for o perfil de outra pessoa, esconde o botão de salvar e desabilita edição
+    // 4. Se for o perfil de outra pessoa, esconde botão de salvar e bloqueia edição
     if (!ehMeuProprioPerfil) {
         if (btnSalvar) btnSalvar.style.display = "none";
         if (campoFoto) campoFoto.style.display = "none";
@@ -282,18 +282,12 @@ async function carregarPerfil() {
         if (bio) bio.disabled = false;
     }
 
-    // 5. Carrega os dados do perfil
-    const chavePerfil = "furiaPerfil_" + usuarioAlvo;
-    const perfil = JSON.parse(localStorage.getItem(chavePerfil) || localStorage.getItem("furiaPerfil") || "{}");
-
-    if (email) email.value = perfil.email || "";
-    if (nascimento) nascimento.value = perfil.nascimento || "";
-    if (bio) bio.value = perfil.bio || "";
-    if (typeof contadorBio === "function") contadorBio();
-
-    const foto = localStorage.getItem("furiaFoto_" + usuarioAlvo) || localStorage.getItem("furiaFoto");
+    // 5. Carrega a foto do usuário alvo
+    const foto = localStorage.getItem("furiaFoto_" + usuarioAlvo);
     if (avatar && foto) {
         avatar.innerHTML = `<img src="${foto}" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+    } else if (avatar) {
+        avatar.innerHTML = `<img src="avatar-padrao.png" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
     }
 }
 

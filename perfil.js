@@ -69,13 +69,12 @@ function salvarPerfil() {
         const leitor = new FileReader();
 
         leitor.onload = function(evento) {
-            // Salva na gaveta exclusiva do usuário ativo
-            localStorage.setItem(chaveFotoUsuario, evento.target.result);
-            
-            
-            if (usuarioSessaoAlvo === usuarioSessao) {
-                localStorage.setItem("furiaFoto", evento.target.result);
-            }
+    // Salva a foto com o nome específico do usuário logado (ex: furiaFoto_Zanf)
+           const meuUsuario = localStorage.getItem("furiaUsuario") || localStorage.getItem("usuarioLogado") || "";
+         if (meuUsuario) {
+                localStorage.setItem("furiaFoto_" + meuUsuario, evento.target.result);
+             }
+
 
             if (typeof adicionarNotificacao === "function") {
                 adicionarNotificacao("Seu perfil e sua foto foram atualizados.");
