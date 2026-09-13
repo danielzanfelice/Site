@@ -60,11 +60,16 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // ==========================================
 // CONEXÃO COM O BANCO DE DADOS (CONFIGURADO PARA PRODUÇÃO)
 // ==========================================
+
 const conexao = mysql.createConnection({
-    host: "://infinityfree.com",     
-    user: "if0_42901648",                 
-    password: "7Z7La3CKDw5ZW",     
-    database: "if0_42901648_furia_db"     
+    host: "://tidbcloud.com", // O Host da imagem
+    port: 4000,                                         // A Porta obrigatória da imagem
+    user: "4GtbN2TQnHKPTtJ.root",                       // Seu Username da imagem
+    password: "qo5ghEqeu7VrYhq2",       // A Senha gerada no Passo 1
+    database: "sys",                                    // O Database padrão da imagem
+    ssl: {
+        rejectUnauthorized: false                       // OBRIGATÓRIO: Permite a conexão segura exigida pela TiDB Cloud
+    }
 });
 
 conexao.connect((erro) => {
