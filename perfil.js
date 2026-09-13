@@ -200,24 +200,18 @@ function carregarPerfil() {
 document.addEventListener("DOMContentLoaded", carregarPerfil);
 
 
-
 async function enviarPedidoAmizade() {
-    const usuarioLogado = localStorage.getItem("furiaUsuario");
+    const usuarioLogado = localStorage.getItem("furiaUsuario") || localStorage.getItem("usuarioLogado");
     const btnAmigo = document.getElementById("btn-adicionar-amigo");
     const messageElement = document.getElementById("mensagem");
 
     const urlParams = new URLSearchParams(window.location.search);
-    let usuarioDoPerfil = urlParams.get("user");
+    const usuarioDoPerfil = urlParams.get("user");
 
-    if (!usuarioDoPerfil) {
-        const nomePerfilElemento = document.getElementById("nome-perfil");
-        if (nomePerfilElemento) {
-            usuarioDoPerfil = nomePerfilElemento.textContent.replace("Usuário: ", "").trim();
-        }
-    }
+    if (!usuarioLogado || !usuarioDoPerfil) return;
 
     try {
-        const resposta = await fetch("/amizades/enviar", {
+        const resposta = await fetch(`${URL_SERVIDOR}/amizades/enviar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id_remetente: usuarioLogado, id_destinatario: usuarioDoPerfil })
@@ -239,14 +233,17 @@ async function enviarPedidoAmizade() {
         } else {
             if (messageElement) {
                 messageElement.style.color = "#e5151a";
-                messageElement.textContent = dados.erro;
+                messageElement.textContent = dados.erro || "Não foi possível enviar o pedido.";
             } else {
                 alert(dados.erro);
             }
         }
     } catch (erro) {
         console.error(erro);
-        alert("Erro ao conectar com o servidor.");
+        if (messageElement) {
+            messageElement.style.color = "#e5151a";
+            messageElement.textContent = "Erro ao conectar com o servidor.";
+        }
     }
 }
 

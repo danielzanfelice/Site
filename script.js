@@ -237,60 +237,99 @@ function salvarPerfil() {
         }
         alert("Perfil salvo com sucesso!");
     }
-}
 
+}
 async function carregarPerfil() {
-    // 1. Pega o usuário da URL (ex: ?user=dj.mv_07)
     const params = new URLSearchParams(window.location.search);
     const usuarioUrl = params.get("user");
-    const meuUsuario = usuarioAtual();
+    const meuUsuario = localStorage.getItem("furiaUsuario") || localStorage.getItem("usuarioLogado") || "";
 
-    // Se tiver usuário na URL, usamos ele; se não, usamos quem está logado
     const usuarioAlvo = usuarioUrl ? usuarioUrl : meuUsuario;
-    const ehMeuProprioPerfil = !usuarioUrl || (usuarioUrl.toLowerCase() === meuUsuario.toLowerCase());
+    const ehProprioPerfil = !usuarioUrl || (usuarioUrl.toLowerCase() === meuUsuario.toLowerCase());
 
-    // 2. Elementos da tela
-    const tituloPerfil = document.getElementById("titulo-perfil") || document.querySelector(".conteudo-perfil h2, h2");
-    const nomePerfil = document.getElementById("nome-perfil");
-    const btnSalvar = document.querySelector("button[onclick*='salvarPerfil'], .btn-salvar, button.btn-principal");
-    const campoFoto = document.getElementById("foto") || document.getElementById("foto-perfil");
+    // 1. Atualiza títulos e nomes
+    const tituloPerfil = document.getElementById("titulo-perfil");
+    const textoNomeUsuario = document.getElementById("usuario-nome-texto");
+    const nomeNav = document.getElementById("nome-perfil");
+
+    if (tituloPerfil) {
+        tituloPerfil.textContent = ehProprioPerfil ? "Meu perfil" : "Perfil de " + usuarioAlvo;
+    }
+    if (textoNomeUsuario) {
+        textoNomeUsuario.textContent = usuarioAlvo;
+    }
+    if (nomeNav && meuUsuario) {
+        nomeNav.textContent = meuUsuario;
+    }
+
     const email = document.getElementById("email");
     const nascimento = document.getElementById("nascimento");
     const bio = document.getElementById("bio");
     const avatar = document.getElementById("avatar");
+    const btnAmigo = document.getElementById("btn-adicionar-amigo");
+    const btnSalvar = document.querySelector(".btn-principal");
+    const campoFoto = document.getElementById("foto");
+    const nomeFoto = document.getElementById("nome-foto-perfil");
 
-    // 3. Ajusta o nome e título na interface
-    if (nomePerfil) {
-        nomePerfil.textContent = usuarioAlvo;
-    }
-    if (tituloPerfil) {
-        tituloPerfil.textContent = ehMeuProprioPerfil ? "Meu perfil" : `Perfil de ${usuarioAlvo}`;
-    }
-
-    // 4. Se for o perfil de outra pessoa, esconde botão de salvar e bloqueia edição
-    if (!ehMeuProprioPerfil) {
+    // 2. Trava edição para visitantes
+    if (!ehProprioPerfil) {
         if (btnSalvar) btnSalvar.style.display = "none";
         if (campoFoto) campoFoto.style.display = "none";
+        if (nomeFoto) nomeFoto.style.display = "none";
         if (email) email.disabled = true;
         if (nascimento) nascimento.disabled = true;
         if (bio) bio.disabled = true;
+        if (btnAmigo) {
+            btnAmigo.style.display = "flex";
+            atualizarIconeAmizadeVisual(btnAmigo);
+        }
     } else {
         if (btnSalvar) btnSalvar.style.display = "block";
         if (campoFoto) campoFoto.style.display = "block";
+        if (nomeFoto) nomeFoto.style.display = "inline";
         if (email) email.disabled = false;
         if (nascimento) nascimento.disabled = false;
         if (bio) bio.disabled = false;
+        if (btnAmigo) btnAmigo.style.display = "none";
     }
 
-    // 5. Carrega a foto do usuário alvo
-    const foto = localStorage.getItem("furiaFoto_" + usuarioAlvo);
-    if (avatar && foto) {
-        avatar.innerHTML = `<img src="${foto}" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
-    } else if (avatar) {
-        avatar.innerHTML = `<img src="avatar-padrao.png" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+    // 3. Busca os dados reais do perfil no banco de dados da Render
+    try {
+        const resposta = await fetch(`${URL_SERVIDOR}/perfil?usuario=${encodeURIComponent(usuarioAlvo)}`);
+        if (resposta.ok) {
+            const dados = await resposta.json();
+            if (email) email.value = dados.email || "";
+            if (nascimento) nascimento.value = dados.data_nascimento ? dados.data_nascimento.split("T")[0] : "";
+            if (bio) bio.value = dados.biografia || "";
+            if (typeof contadorBio === "function") contadorBio();
+
+            if (avatar) {
+                if (dados.foto) {
+                    const urlFoto = dados.foto.startsWith("http") ? dados.foto : `${URL_SERVIDOR}/uploads/${dados.foto}`;
+                    avatar.innerHTML = `<img src="${urlFoto}" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                } else {
+                    avatar.innerHTML = `<img src="avatar-padrao.png" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                }
+            }
+            return;
+        }
+    } catch (e) {
+        console.warn("Buscando do cache local...");
+    }
+
+    // Fallback: se não carregar da Render, usa cache local
+    const perfilLocal = JSON.parse(localStorage.getItem("furiaPerfil_" + usuarioAlvo) || "{}");
+    const fotoLocal = localStorage.getItem("furiaFoto_" + usuarioAlvo);
+    if (email) email.value = perfilLocal.email || "";
+    if (nascimento) nascimento.value = perfilLocal.nascimento || "";
+    if (bio) bio.value = perfilLocal.bio || "";
+    if (typeof contadorBio === "function") contadorBio();
+    if (avatar) {
+        avatar.innerHTML = fotoLocal 
+            ? `<img src="${fotoLocal}" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`
+            : `<img src="avatar-padrao.png" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
     }
 }
-
 
 /* ==========================================
    CONTADORES E AUXILIARES DO FEED
@@ -788,7 +827,7 @@ async function carregarPedidosAmizadeNoSininho() {
 
 async function responderPedidoAmizade(idSolicitacao, acao, botaoElemento) {
     try {
-        const resposta = await fetch("/amizades/responder", {
+        const resposta = await fetch(`${URL_SERVIDOR}/amizades/responder`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id_solicitacao: idSolicitacao, acao: acao })
@@ -796,7 +835,6 @@ async function responderPedidoAmizade(idSolicitacao, acao, botaoElemento) {
         const dados = await resposta.json();
         if (resposta.ok) {
             const containerPai = botaoElemento.parentElement;
-            // CORREÇÃO: Adicionadas crases no HTML de feedback
             containerPai.innerHTML = `<span style="color: ${acao === 'aceito' ? '#00ff00' : '#e5151a'}; font-weight: bold; font-size: 11px;">${acao === 'aceito' ? 'ACEITO!' : 'RECUSADO!'}</span>`;
             setTimeout(() => {
                 containerPai.parentElement.remove();
@@ -810,31 +848,15 @@ async function responderPedidoAmizade(idSolicitacao, acao, botaoElemento) {
                         badge.classList.add("oculto");
                     }
                 }
-            }, 1500);
+            }, 1000);
         } else {
-            alert(dados.erro || "Erro ao processar resposta.");
+            alert(dados.mensagem || "Erro ao responder pedido.");
         }
     } catch (erro) {
-        console.error(erro);
-        alert("Erro ao conectar com o servidor.");
+        console.error("Erro ao responder pedido de amizade:", erro);
+        alert("Erro de conexão ao responder pedido.");
     }
 }
-
-function inicializarAtualizacaoTempoReal() {
-    carregarPerfil();
-    carregarPostagens();
-    setTimeout(carregarPedidosAmizadeNoSininho, 300);
-    setInterval(async function() {
-        if (document.getElementById("container-posts")) {
-            await carregarPostagens();
-        }
-        if (document.getElementById("lista-notificacoes")) {
-            await carregarPedidosAmizadeNoSininho();
-        }
-    }, 5000);
-}
-
-document.addEventListener("DOMContentLoaded", inicializarAtualizacaoTempoReal);
 
 /* ==========================================
    INTERCEPTADOR DE CLIQUES (MENU FLUTUANTE)
