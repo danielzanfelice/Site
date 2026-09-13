@@ -58,14 +58,30 @@ const limiterRegistro = rateLimit({
 app.use(express.static(__dirname));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-const conexao = mysql.createConnection({
+const conexao = mysql.createPool({
     host: "gateway01.sa-east-1.prod.aws.tidbcloud.com",
     port: 4000,                                         
     user: "4GtbN2TQnHKPTtJ.root",                       
     password: "qo5ghEqeu7VrYhq2",                       
     database: "test",                                    
-    ssl: {
-        rejectUnauthorized: false                       
+      ssl: {
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: true
+    },
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000 // Mantém a conexão viva a cada 10 segundos
+});
+
+// Teste rápido para confirmar que o pool conectou sem derrubar o servidor
+db.getConnection((erro, conexao) => {
+    if (erro) {
+        console.error("Erro ao conectar ao TiDB Cloud:", erro.message);
+    } else {
+        console.log("Conectado ao MySQL da TiDB Cloud com segurança!");
+        conexao.release(); // Libera a conexão de volta para o pool
     }
 });
 // Liga o banco e injeta a criação automática de tabelas se elas não existirem
