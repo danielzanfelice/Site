@@ -1,4 +1,4 @@
-const URL_SERVIDOR = "https://onrender.com";
+const URL_SERVIDOR = "https://sitefuria.onrender.com";
 const usuarioSessao = localStorage.getItem("furiaUsuario") || "daniel";
 const urlParams = new URLSearchParams(window.location.search);
 const usuarioURL = urlParams.get("user");
