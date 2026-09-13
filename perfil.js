@@ -1,8 +1,8 @@
 const URL_SERVIDOR = "https://sitefuria.onrender.com";
-const usuarioSessao = localStorage.getItem("furiaUsuario") || "daniel";
+const usuarioSessao = localStorage.getItem("furiaUsuario") || localStorage.getItem("usuarioLogado") || "";
 const urlParams = new URLSearchParams(window.location.search);
 const usuarioURL = urlParams.get("user");
-const usuarioSessaoAlvo = usuarioURL ? usuarioURL.trim() : usuarioSessao;
+const usuarioSessaoAlvo = usuarioUrl ? usuarioUrl : usuarioSessao;
 const chavePerfilUsuario = "furiaPerfil_" + usuarioSessaoAlvo;
 const chaveFotoUsuario = "furiaFoto_" + usuarioSessaoAlvo;
 
@@ -124,84 +124,80 @@ async function atualizarIconeAmizadeVisual(btnAmigo) {
     }
 }
 
-
 function carregarPerfil() {
-    // Lê estritamente os dados vinculados à chave isolada do usuário alvo atual
-    const dadosLocais = localStorage.getItem(chavePerfilUsuario);
-    const perfil = JSON.parse(dadosLocais || "{}");
+    // 1. Lê quem está na URL e quem está logado
+    const params = new URLSearchParams(window.location.search);
+    const usuarioUrl = params.get("user");
+    const meuUsuario = localStorage.getItem("furiaUsuario") || localStorage.getItem("usuarioLogado") || "";
+
+    // Se tiver ?user= na URL, o alvo é o amigo; se não, sou eu mesmo
+    const usuarioAlvo = usuarioUrl ? usuarioUrl : meuUsuario;
+    const ehProprioPerfil = !usuarioUrl || (usuarioUrl.toLowerCase() === meuUsuario.toLowerCase());
+
+    // 2. Atualiza o título grande (h1) e o nome do usuário
+    const tituloPerfil = document.getElementById("titulo-perfil");
+    const textoNomeUsuario = document.getElementById("usuario-nome-texto");
+    const nomeNav = document.getElementById("nome-perfil");
+
+    if (tituloPerfil) {
+        tituloPerfil.textContent = ehProprioPerfil ? "Meu perfil" : "Perfil de " + usuarioAlvo;
+    }
+    if (textoNomeUsuario) {
+        textoNomeUsuario.textContent = usuarioAlvo;
+    }
+    if (nomeNav && meuUsuario) {
+        nomeNav.textContent = meuUsuario;
+    }
+
+    // 3. Lê os dados do perfil desse usuário específico
+    const chavePerfil = "furiaPerfil_" + usuarioAlvo;
+    const perfil = JSON.parse(localStorage.getItem(chavePerfil) || "{}");
 
     const email = document.getElementById("email");
     const nascimento = document.getElementById("nascimento");
     const bio = document.getElementById("bio");
     const avatar = document.getElementById("avatar");
     const btnAmigo = document.getElementById("btn-adicionar-amigo");
+    const btnSalvar = document.querySelector(".btn-principal");
+    const campoFoto = document.getElementById("foto");
+    const nomeFoto = document.getElementById("nome-foto-perfil");
 
     if (email) email.value = perfil.email || "";
     if (nascimento) nascimento.value = perfil.nascimento || "";
     if (bio) bio.value = perfil.bio || "";
+    if (typeof contadorBio === "function") contadorBio();
 
-    contadorBio();
-
-    
-    const foto = localStorage.getItem(chaveFotoUsuario);
-
+    // 4. Foto do perfil
+    const foto = localStorage.getItem("furiaFoto_" + usuarioAlvo);
     if (avatar && foto) {
-        avatar.innerHTML = `
-            <img src="${foto}" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-        `;
+        avatar.innerHTML = `<img src="${foto}" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
     } else if (avatar) {
-        
-        avatar.innerHTML = `
-            <img src="avatar-padrao.png" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-        `;
+        avatar.innerHTML = `<img src="avatar-padrao.png" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
     }
 
-    const nomePerfil = document.getElementById("nome-perfil");
-    if (nomePerfil) {
-        nomePerfil.textContent = (usuarioSessaoAlvo === usuarioSessao) ? "Meu perfil" : "Perfil de " + usuarioSessaoAlvo;
-    }
-
-    const textoNomeUsuario = document.getElementById("usuario-nome-texto");
-    if (textoNomeUsuario) {
-        textoNomeUsuario.textContent = usuarioSessaoAlvo;
-    }
-
-    if (btnAmigo) {
-        if (usuarioSessaoAlvo === usuarioSessao) {
-            btnAmigo.style.display = "none";
-        } else {
-            btnAmigo.style.display = "flex";
-            btnAmigo.disabled = false;
-            btnAmigo.style.borderColor = "#e5151a";
-            btnAmigo.style.color = "#ffffff";
-            btnAmigo.setAttribute("onclick", "enviarPedidoAmizade()");
-            btnAmigo.innerHTML = `
-                <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="8.5" cy="7" r="4"></circle>
-                    <circle cx="18" cy="14" r="5" stroke="#e5151a"></circle>
-                    <line x1="18" y1="11" x2="18" y2="17" stroke="#e5151a"></line>
-                    <line x1="15" y1="14" x2="21" y2="14" stroke="#e5151a"></line>
-                </svg>
-            `;
-            atualizarIconeAmizadeVisual(btnAmigo);
-        }
-    }
-
-    if (usuarioSessaoAlvo !== usuarioSessao) {
+    // 5. Se for o perfil de outra pessoa: esconde botão de salvar e bloqueia edição
+    if (!ehProprioPerfil) {
+        if (btnSalvar) btnSalvar.style.display = "none";
+        if (campoFoto) campoFoto.style.display = "none";
+        if (nomeFoto) nomeFoto.style.display = "none";
         if (email) email.disabled = true;
         if (nascimento) nascimento.disabled = true;
         if (bio) bio.disabled = true;
-        
-        const btnSalvar = document.querySelector(".btn-principal");
-        if (btnSalvar) btnSalvar.style.display = "none";
-        
-        const inputFoto = document.getElementById("foto");
-        if (inputFoto) inputFoto.style.display = "none";
+        if (btnAmigo) btnAmigo.style.display = "flex";
+    } else {
+        if (btnSalvar) btnSalvar.style.display = "block";
+        if (campoFoto) campoFoto.style.display = "block";
+        if (nomeFoto) nomeFoto.style.display = "inline";
+        if (email) email.disabled = false;
+        if (nascimento) nascimento.disabled = false;
+        if (bio) bio.disabled = false;
+        if (btnAmigo) btnAmigo.style.display = "none";
     }
 }
 
+// Executa ao carregar a página
 document.addEventListener("DOMContentLoaded", carregarPerfil);
+
 
 
 async function enviarPedidoAmizade() {
