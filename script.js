@@ -1,4 +1,7 @@
-const URL_SERVIDOR = "https://onrender.com"; // Substitua pelo seu link real da Render se for diferente
+
+// Coloque a URL real que a Render gerou para o seu servidor (sem a barra no final)
+const URL_SERVIDOR = "https://sitefuria.onrender.com";
+
 /* ==========================================
    FUNÇÕES GERAIS E CONTROLE DE SESSÃO
    ========================================== */
@@ -16,9 +19,9 @@ function escaparTexto(texto) {
 }
 
 /* ==========================================
-   AUTENTICAÇÃO / LOGIN
+   AUTENTICAÇÃO (LOGIN E REGISTRO)
    ========================================== */
-function fazerLogin() {
+async function fazerLogin() {
     const usuario = document.getElementById("usuario")?.value.trim();
     const senha = document.getElementById("senha")?.value;
     const mensagem = document.getElementById("mensagem");
@@ -31,12 +34,87 @@ function fazerLogin() {
         return;
     }
 
-    localStorage.setItem("furiaUsuario", usuario);
-    window.location.href = "feed.html";
+    try {
+        const resposta = await fetch(`${URL_SERVIDOR}/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ usuario, senha })
+        });
+
+        const dados = await resposta.json();
+
+        if (resposta.ok) {
+            localStorage.setItem("furiaUsuario", usuario);
+            localStorage.setItem("usuarioLogado", usuario);
+            window.location.href = "feed.html";
+        } else {
+            if (mensagem) {
+                mensagem.textContent = dados.mensagem || "Usuário ou senha incorretos.";
+                mensagem.style.color = "#e5151a";
+            }
+        }
+    } catch (erro) {
+        console.error("Erro ao conectar no login:", erro);
+        if (mensagem) {
+            mensagem.textContent = "Não foi possível conectar ao servidor.";
+            mensagem.style.color = "#e5151a";
+        }
+    }
+}
+
+async function fazerRegistro() {
+    const usuario = (document.getElementById("novoUsuario") || document.getElementById("usuario"))?.value.trim();
+    const senha = (document.getElementById("novaSenha") || document.getElementById("senha"))?.value;
+    const mensagem = document.getElementById("mensagem");
+
+    if (!usuario || !senha) {
+        if (mensagem) {
+            mensagem.textContent = "Preencha usuário e senha!";
+            mensagem.style.color = "#e5151a";
+        }
+        return;
+    }
+
+    try {
+        const resposta = await fetch(`${URL_SERVIDOR}/registro`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ usuario, senha })
+        });
+
+        const dados = await resposta.json();
+
+        if (resposta.ok && dados.sucesso !== false) {
+            if (mensagem) {
+                mensagem.textContent = dados.mensagem || "Conta criada com sucesso!";
+                mensagem.style.color = "#28a745";
+            }
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 1500);
+        } else {
+            if (mensagem) {
+                mensagem.textContent = dados.mensagem || "Erro ao registrar.";
+                mensagem.style.color = "#e5151a";
+            }
+        }
+    } catch (erro) {
+        console.error("Erro ao registrar:", erro);
+        if (mensagem) {
+            mensagem.textContent = "Não foi possível conectar ao servidor.";
+            mensagem.style.color = "#e5151a";
+        }
+    }
 }
 
 function sair() {
     localStorage.removeItem("furiaUsuario");
+    localStorage.removeItem("usuarioLogado");
+    window.location.href = "index.html";
 }
 
 /* ==========================================
@@ -215,7 +293,7 @@ async function carregarPostagens() {
         }
 
         container.innerHTML = postagens.map(function(post) {
-            const tagFoto = post.foto ? `<img src="/uploads/${post.foto}" alt="Foto do Post" style="max-width: 100%; margin-top: 12px; border: 1px solid #292929;">` : "";
+            const tagFoto = post.foto ? `<img src=""${URL_SERVIDOR}/uploads/${post.foto}"" alt="Foto do Post" style="max-width: 100%; margin-top: 12px; border: 1px solid #292929;">` : "";
             const dataPost = post.criado_em ? new Date(post.criado_em).toLocaleString("pt-BR") : "";
             const usuarioLimpo = String(post.usuario).trim();
 
@@ -313,7 +391,7 @@ async function curtirPost(idPost, botaoElemento) {
     if (!idPost) return;
 
     try {
-        const resposta = await fetch(`/postagens/${idPost}/curtir`, {
+        const resposta = await fetch(`${URL_SERVIDOR}/postagens/${idPost}/curtir`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ usuario: usuarioAtual() })
@@ -349,7 +427,7 @@ async function comentarPost(idPost) {
     input.value = ""; // Limpa a caixa de texto imediatamente
 
     try {
-        const resposta = await fetch(`/postagens/${idPost}/comentar`, {
+        const resposta = await fetch(`${URL_SERVIDOR}/postagens/${idPost}/comentar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -383,7 +461,7 @@ async function excluirComentario(idComentario, idPost) {
     if (!confirm("Deseja realmente apagar o seu comentário?")) return;
 
     try {
-        const resposta = await fetch(`/comentarios/${idComentario}`, {
+        const resposta = await fetch(`${URL_SERVIDOR}/comentarios/${idComentario}`, {
             method: "DELETE"
         });
 
@@ -469,7 +547,7 @@ async function publicarPost() {
     }
 
     try {
-        const resposta = await fetch("/postagens", {
+        const resposta = await fetch(`${URL_SERVIDOR}/postagens`, { 
             method: "POST",
             body: dadosFormulario
         });
@@ -510,7 +588,7 @@ async function excluirPost(id) {
         return;
     try {
         // CORREÇÃO: Adicionadas crases na URL
-        const respostaExcluir = await fetch(`/postagens/${id}`, {
+        const respostaExcluir = await fetch(`${URL_SERVIDOR}/postagens/${id}`, {
             method: "DELETE"
         });
         const dados = await respostaExcluir.json();
@@ -575,7 +653,7 @@ async function realizarBuscaUnificada() {
     }
     try {
         // CORREÇÃO: Adicionadas crases na URL
-        const respostaBusca = await fetch(`/buscar?q=${encodeURIComponent(termo)}`);
+        const respostaBusca = await fetch(`${URL_SERVIDOR}/buscar?q=${encodeURIComponent(termo)}`);
         const dados = await respostaBusca.json();
         containerResultados.innerHTML = "";
         containerResultados.style.display = "block";
@@ -857,7 +935,7 @@ async function carregarMensagensDoBanco() {
   if (!areaTexto || !amigoChatAtivo) return;
 
   try {
-    const resposta = await fetch(`/mensagens/historico?remetente=${encodeURIComponent(meuUsuario)}&destinatario=${encodeURIComponent(amigoChatAtivo)}`);
+    const resposta = await fetch(`${URL_SERVIDOR}/mensagens/historico?remetente=${encodeURIComponent(meuUsuario)}&destinatario=${encodeURIComponent(amigoChatAtivo)}`);
     if (!resposta.ok) return;
 
     const historico = await resposta.json();
@@ -924,7 +1002,7 @@ async function enviarMensagemChatReal() {
   campo.value = "";
 
   try {
-    await fetch("/mensagens/enviar", {
+    await fetch(`${URL_SERVIDOR}/mensagens/enviar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ remetente: meuUsuario, destinatario: amigoChatAtivo, conteudo: texto })
@@ -939,7 +1017,7 @@ async function marcarMensagensComoLidas(amigo) {
   const meuUsuario = usuarioAtual();
   if (!amigo || !meuUsuario) return;
   try {
-    await fetch("/mensagens/marcar-lidas", {
+    await fetch(`${URL_SERVIDOR}/mensagens/marcar-lidas`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ remetente: amigo.trim(), destinatario: meuUsuario.trim() })
@@ -961,7 +1039,7 @@ function removerPiscarAoClicarNoChat() {
 async function verificarNovasMensagensParaSubirEPiscar() {
   const meuUsuario = usuarioAtual();
   try {
-    const resposta = await fetch(`/mensagens/nao-lidas?usuario=${encodeURIComponent(meuUsuario)}`);
+    const resposta = await fetch(`${URL_SERVIDOR}/mensagens/nao-lidas?usuario=${encodeURIComponent(meuUsuario)}`);
     if (!resposta.ok) return;
 
     const naoLidas = await resposta.json();
