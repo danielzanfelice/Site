@@ -6,7 +6,7 @@ const URL_SERVIDOR = "https://sitefuria.onrender.com";
    FUNÇÕES GERAIS E CONTROLE DE SESSÃO
    ========================================== */
 function usuarioAtual() {
-    return localStorage.getItem("furiaUsuario") || "daniel";
+    return localStorage.getItem("furiaUsuario") || localStorage.getItem("usuarioLogado") || "";
 }
 
 function escaparTexto(texto) {
@@ -239,27 +239,64 @@ function salvarPerfil() {
     }
 }
 
-function carregarPerfil() {
-    const perfil = JSON.parse(localStorage.getItem("furiaPerfil") || "{}");
+async function carregarPerfil() {
+    // 1. Pega o usuário da URL (ex: ?user=dj.mv_07)
+    const params = new URLSearchParams(window.location.search);
+    const usuarioUrl = params.get("user");
+    const meuUsuario = usuarioAtual();
+
+    // Se tiver usuário na URL, usamos ele; se não, usamos quem está logado
+    const usuarioAlvo = usuarioUrl ? usuarioUrl : meuUsuario;
+    const ehMeuProprioPerfil = !usuarioUrl || usuarioUrl.toLowerCase() === meuUsuario.toLowerCase();
+
+    // 2. Elementos da tela
+    const tituloPerfil = document.querySelector(".conteudo-perfil h2, h2");
+    const nomePerfil = document.getElementById("nome-perfil");
+    const btnSalvar = document.querySelector("button[onclick*='salvarPerfil'], .btn-salvar, button.btn-principal");
+    const campoFoto = document.getElementById("foto") || document.getElementById("foto-perfil");
     const email = document.getElementById("email");
     const nascimento = document.getElementById("nascimento");
     const bio = document.getElementById("bio");
     const avatar = document.getElementById("avatar");
 
+    // 3. Ajusta o nome e título na interface
+    if (nomePerfil) {
+        nomePerfil.textContent = usuarioAlvo;
+    }
+    if (tituloPerfil) {
+        tituloPerfil.textContent = ehMeuProprioPerfil ? "Meu perfil" : `Perfil de ${usuarioAlvo}`;
+    }
+
+    // 4. Se for o perfil de outra pessoa, esconde o botão de salvar e desabilita edição
+    if (!ehMeuProprioPerfil) {
+        if (btnSalvar) btnSalvar.style.display = "none";
+        if (campoFoto) campoFoto.style.display = "none";
+        if (email) email.disabled = true;
+        if (nascimento) nascimento.disabled = true;
+        if (bio) bio.disabled = true;
+    } else {
+        if (btnSalvar) btnSalvar.style.display = "block";
+        if (campoFoto) campoFoto.style.display = "block";
+        if (email) email.disabled = false;
+        if (nascimento) nascimento.disabled = false;
+        if (bio) bio.disabled = false;
+    }
+
+    // 5. Carrega os dados do perfil
+    const chavePerfil = "furiaPerfil_" + usuarioAlvo;
+    const perfil = JSON.parse(localStorage.getItem(chavePerfil) || localStorage.getItem("furiaPerfil") || "{}");
+
     if (email) email.value = perfil.email || "";
     if (nascimento) nascimento.value = perfil.nascimento || "";
     if (bio) bio.value = perfil.bio || "";
+    if (typeof contadorBio === "function") contadorBio();
 
-    contadorBio();
-    const foto = localStorage.getItem("furiaFoto");
-
+    const foto = localStorage.getItem("furiaFoto_" + usuarioAlvo) || localStorage.getItem("furiaFoto");
     if (avatar && foto) {
         avatar.innerHTML = `<img src="${foto}" alt="Foto de Perfil" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
     }
-
-    const nomePerfil = document.getElementById("nome-perfil");
-    if (nomePerfil) nomePerfil.textContent = usuarioAtual();
 }
+
 
 /* ==========================================
    CONTADORES E AUXILIARES DO FEED
