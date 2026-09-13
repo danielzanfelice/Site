@@ -1,10 +1,11 @@
 const URL_SERVIDOR = "https://sitefuria.onrender.com";
 const usuarioSessao = localStorage.getItem("furiaUsuario") || localStorage.getItem("usuarioLogado") || "";
 const urlParams = new URLSearchParams(window.location.search);
-const usuarioURL = urlParams.get("user");
+const usuarioUrl = urlParams.get("user"); // <-- troque usuarioURL por usuarioUrl aqui!
 const usuarioSessaoAlvo = usuarioUrl ? usuarioUrl : usuarioSessao;
 const chavePerfilUsuario = "furiaPerfil_" + usuarioSessaoAlvo;
 const chaveFotoUsuario = "furiaFoto_" + usuarioSessaoAlvo;
+
 
 function contadorBio() {
     const bio = document.getElementById("bio");
