@@ -10,6 +10,7 @@ const rateLimit = require("express-rate-limit");
 const crypto = require("crypto");
 
 const app = express();
+app.set("trust proxy", 1);
 
 // ==========================================
 // CAMADA DE SEGURANÇA
@@ -58,7 +59,7 @@ app.use(express.static(__dirname));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const conexao = mysql.createConnection({
-    host: "://tidbcloud.com",
+    host: ":gateway01.sa-east-1.prod.aws.tidbcloud.com",
     port: 4000,                                         
     user: "4GtbN2TQnHKPTtJ.root",                       
     password: "qo5ghEqeu7VrYhq2",                       
