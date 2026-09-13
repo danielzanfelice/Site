@@ -26,4 +26,5 @@ async function fazerRegistro(){
     } catch (erro) {
         mensagem.textContent = "Não foi possivel conectar ao servidor." ;
     }
-} 
+}
+
