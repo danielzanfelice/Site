@@ -9,7 +9,7 @@ async function fazerRegistro(){
     }
 
     try {
-        const resposta = await fetch ("/registro", {
+        const resposta = await fetch(`${URL_SERVIDOR}/registro`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

@@ -1,4 +1,4 @@
-
+const URL_SERVIDOR = "https://onrender.com";
 const usuarioSessao = localStorage.getItem("furiaUsuario") || "daniel";
 const urlParams = new URLSearchParams(window.location.search);
 const usuarioURL = urlParams.get("user");
@@ -39,7 +39,30 @@ function salvarPerfil() {
     };
 
     localStorage.setItem(chavePerfilUsuario, JSON.stringify(perfil));
+// --- ENVIO DOS DADOS PARA O BANCO DE DADOS NA RENDER ---
+    const formData = new FormData();
+    formData.append("usuario", usuarioSessao); // Usa a variável que você já tem na linha 3
+    formData.append("email", email.value);
+    formData.append("dataNascimento", nascimento.value);
+    formData.append("biografia", bio.value);
+    
+    // Verifica se o usuário selecionou uma nova foto antes de enviar
+    if (foto.files && foto.files[0]) {
+        formData.append("foto", foto.files[0]);
+    }
 
+    fetch(`${URL_SERVIDOR}/perfil`, {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(dados => {
+        if (!dados.sucesso) {
+            console.error("Aviso do servidor:", dados.mensagem);
+        }
+    })
+    .catch(err => console.error("Erro ao conectar com a Render:", err));
+    // -------------------------------------------------------
     if (foto && foto.files && foto.files[0]) {
         const leitor = new FileReader();
 
