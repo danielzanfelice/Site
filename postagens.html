@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Postagens - Furia</title>
+</head>
+<body>
+
+    <h1>Postagens</h1>
+    <p id="usuarioLogado"></p>
+
+    <h2>Nova Postagem</h2>
+
+    <input type="text" id="titulo" placeholder="Título da postagem">
+    <br><br>
+
+    <textarea
+        id="conteudo"
+        maxlength="1000"
+        rows="6"
+        cols="50"
+        placeholder="Escreva sua postagem...">
+    </textarea>
+    <p><span id="contador">0</span>/1000 caracteres</p>
+
+    <button onclick="publicar()">Publicar</button>
+    <p id="mensagem"></p>
+
+    <hr>
+
+    <h2>Feed</h2>
+    <div id="feed"></div>
+
+    <br>
+    <a href="perfil.html">Meu Perfil</a>
+    &nbsp;|&nbsp;
+    <a href="suporte.html">Suporte</a>
+    &nbsp;|&nbsp;
+    <a href="index.html">Sair</a>
+
+    <script src="postagens.js"></script>
+</body>
+</html>

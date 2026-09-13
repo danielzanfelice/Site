@@ -61,10 +61,10 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // CONEXÃO COM O BANCO DE DADOS (CONFIGURADO PARA PRODUÇÃO)
 // ==========================================
 const conexao = mysql.createConnection({
-    host: "://infinityfree.com",     // <--- VEJA NO SEU PAINEL (Ex: ://infinityfree.com)
-    user: "if0_42901648",                 // <--- SEU USUÁRIO DA HOSPEDAGEM
-    password: "SUA_SENHA_DO_PAINEL",     // <--- COLOQUE A SENHA DA SUA CONTA INFINITYFREE
-    database: "if0_42901648_furia_db"     // <--- NOME DO BANCO CRIADO LÁ (Ex: if0_42901648_db)
+    host: "://infinityfree.com",     
+    user: "if0_42901648",                 
+    password: "7Z7La3CKDw5ZW",     
+    database: "if0_42901648_furia_db"     
 });
 
 conexao.connect((erro) => {
@@ -696,10 +696,11 @@ app.put("/comentarios/:id", (req, res) => {
 });
 
 // ==========================================
-// INICIALIZAÇÃO
+// INICIALIZAÇÃO (ADAPTADO PARA PRODUÇÃO NA NUVEM)
 // ==========================================
+const PORT = process.env.PORT || 3000;
 
-app.listen(3000, () => {
-    console.log("Servidor rodando em http://localhost:3000");
+app.listen(PORT, () => {
+    console.log(`Servidor rodando com sucesso na porta ${PORT}`);
 });
 
