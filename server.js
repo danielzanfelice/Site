@@ -63,7 +63,7 @@ const conexao = mysql.createConnection({
     port: 4000,                                         
     user: "4GtbN2TQnHKPTtJ.root",                       
     password: "qo5ghEqeu7VrYhq2",                       
-    database: "sys",                                    
+    database: "test",                                    
     ssl: {
         rejectUnauthorized: false                       
     }
