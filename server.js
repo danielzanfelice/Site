@@ -57,28 +57,63 @@ const limiterRegistro = rateLimit({
 app.use(express.static(__dirname));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ==========================================
-// CONEXÃO COM O BANCO DE DADOS (CONFIGURADO PARA PRODUÇÃO DO TiDB CLOUD)
-// ==========================================
 const conexao = mysql.createConnection({
-    host: "://tidbcloud.com", // Host seguro do TiDB Cloud
-    port: 4000,                                         // Porta obrigatória do TiDB Cloud
-    user: "4GtbN2TQnHKPTtJ.root",                       // Seu usuário do TiDB Cloud
-    password: "qo5ghEqeu7VrYhq2",                       // Sua senha de produção do TiDB Cloud
-    database: "sys",                                    // Banco de dados padrão
+    host: "://tidbcloud.com",
+    port: 4000,                                         
+    user: "4GtbN2TQnHKPTtJ.root",                       
+    password: "qo5ghEqeu7VrYhq2",                       
+    database: "sys",                                    
     ssl: {
-        rejectUnauthorized: false                       // OBRIGATÓRIO para conexões na nuvem do TiDB Cloud
+        rejectUnauthorized: false                       
     }
 });
-
+// Liga o banco e injeta a criação automática de tabelas se elas não existirem
 conexao.connect((erro) => {
     if (erro) {
         console.error("Erro ao conectar ao MySQL da TiDB Cloud:", erro.message);
         return;
     }
     console.log("Conectado ao MySQL da TiDB Cloud com segurança!");
-});
 
+    const tabelas = [
+        `CREATE TABLE IF NOT EXISTS usuarios (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario VARCHAR(50) NOT NULL UNIQUE,
+            email VARCHAR(100) NOT NULL UNIQUE,
+            senha VARCHAR(255) NOT NULL,
+            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );`,
+        `CREATE TABLE IF NOT EXISTS postagens (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario VARCHAR(50) NOT NULL,
+            titulo VARCHAR(100) NOT NULL,
+            conteudo TEXT NOT NULL,
+            foto VARCHAR(255),
+            curtidas INT DEFAULT 0,
+            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );`,
+        `CREATE TABLE IF NOT EXISTS comentarios (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            post_id INT NOT NULL,
+            usuario VARCHAR(50) NOT NULL,
+            conteudo TEXT NOT NULL,
+            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );`,
+        `CREATE TABLE IF NOT EXISTS suportes (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario VARCHAR(50) NOT NULL,
+            comentario TEXT NOT NULL,
+            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );`
+    ];
+
+    tabelas.forEach(sql => {
+        conexao.query(sql, (err) => {
+            if (err) console.error("Erro ao verificar tabela:", err.message);
+        });
+    });
+    console.log("🚀 Todas as tabelas estão prontas e verificadas na nuvem!");
+});
 // ==========================================
 // ROTAS DE AUTENTICAÇÃO
 // ==========================================
