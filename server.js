@@ -60,11 +60,11 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const conexao = mysql.createPool({
     host: "gateway01.sa-east-1.prod.aws.tidbcloud.com",
-    port: 4000,                                         
-    user: "4GtbN2TQnHKPTtJ.root",                       
-    password: "qo5ghEqeu7VrYhq2",                       
-    database: "test",                                    
-      ssl: {
+    port: 4000,
+    user: "4GtbN2TQnHKPTtJ.root",
+    password: "qo5ghEqeu7VrYhq2",
+    database: "test",
+    ssl: {
         minVersion: 'TLSv1.2',
         rejectUnauthorized: true
     },
@@ -72,7 +72,17 @@ const conexao = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0,
     enableKeepAlive: true,
-    keepAliveInitialDelay: 10000 // Mantém a conexão viva a cada 10 segundos
+    keepAliveInitialDelay: 10000
+});
+
+// Teste de conexão usando 'conexao' e liberando a conexão de teste
+conexao.getConnection((erro, conn) => {
+    if (erro) {
+        console.error("Erro ao conectar ao TiDB Cloud:", erro.message);
+    } else {
+        console.log("Conectado ao MySQL da TiDB Cloud com segurança!");
+        conn.release();
+    }
 });
 
 // Teste rápido para confirmar que o pool conectou sem derrubar o servidor
