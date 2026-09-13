@@ -75,32 +75,16 @@ const conexao = mysql.createPool({
     keepAliveInitialDelay: 10000
 });
 
-// Teste de conexão usando 'conexao' e liberando a conexão de teste
+// Liga o banco, testa a conexão e injeta a criação automática de tabelas
 conexao.getConnection((erro, conn) => {
     if (erro) {
         console.error("Erro ao conectar ao TiDB Cloud:", erro.message);
-    } else {
-        console.log("Conectado ao MySQL da TiDB Cloud com segurança!");
-        conn.release();
-    }
-});
-
-// Teste rápido para confirmar que o pool conectou sem derrubar o servidor
-db.getConnection((erro, conexao) => {
-    if (erro) {
-        console.error("Erro ao conectar ao TiDB Cloud:", erro.message);
-    } else {
-        console.log("Conectado ao MySQL da TiDB Cloud com segurança!");
-        conexao.release(); // Libera a conexão de volta para o pool
-    }
-});
-// Liga o banco e injeta a criação automática de tabelas se elas não existirem
-conexao.connect((erro) => {
-    if (erro) {
-        console.error("Erro ao conectar ao MySQL da TiDB Cloud:", erro.message);
         return;
     }
+
     console.log("Conectado ao MySQL da TiDB Cloud com segurança!");
+    conn.release(); // Libera a conexão de volta para o pool
+
 
     const tabelas = [
         `CREATE TABLE IF NOT EXISTS usuarios (
